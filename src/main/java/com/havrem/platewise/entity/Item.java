@@ -7,16 +7,16 @@ import jakarta.persistence.*;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    private Long Id;
 
-    String text;
-    Boolean isDone;
+    private String text;
+    private Boolean isDone;
 
     public enum Type {
         BULLET, CHECK, NUMBERED, NONE
     }
 
-    public Item() {
+    protected Item() {
     }
 
     public Item(String text, Boolean isDone) {

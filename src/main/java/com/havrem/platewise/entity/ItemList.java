@@ -6,39 +6,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "item_lists")
 public class ItemList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    private Long id;
 
-    String title;
+    private String title;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    Category category;
+    private Category category;
 
-    Boolean bookmarked;
+    private boolean bookmarked;
 
-    @OneToMany
-    List<Item> items;
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items = new ArrayList<>();
 
-    public ItemList() {
+    protected ItemList() {
     }
 
-    public ItemList(String title, Category category, Boolean bookmarked) {
-        this.items = new ArrayList<>();
-
+    public ItemList(String title, Category category, boolean bookmarked) {
         this.title = title;
         this.category = category;
         this.bookmarked = bookmarked;
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getTitle() {
@@ -57,11 +56,11 @@ public class ItemList {
         this.category = category;
     }
 
-    public Boolean getBookmarked() {
+    public boolean getBookmarked() {
         return bookmarked;
     }
 
-    public void setBookmarked(Boolean bookmarked) {
+    public void setBookmarked(boolean bookmarked) {
         this.bookmarked = bookmarked;
     }
 

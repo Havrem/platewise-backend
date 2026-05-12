@@ -7,11 +7,17 @@ import jakarta.persistence.*;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
-    String name;
-    String icon;
+    private Long Id;
+    private String name;
+    private String icon;
 
-    public Category() {
+    public enum Type {
+        GROCERY,
+        RECIPES,
+        GENERAL
+    }
+
+    protected Category() {
     }
 
     public Category(String name, String icon) {
