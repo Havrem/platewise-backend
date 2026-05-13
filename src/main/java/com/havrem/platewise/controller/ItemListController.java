@@ -1,8 +1,10 @@
 package com.havrem.platewise.controller;
 
+import com.havrem.platewise.config.CurrentUser;
 import com.havrem.platewise.dto.request.CreateItemListRequest;
 import com.havrem.platewise.dto.request.UpdateItemListRequest;
 import com.havrem.platewise.dto.response.ItemListDto;
+import com.havrem.platewise.entity.User;
 import com.havrem.platewise.service.ItemListService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,8 +27,8 @@ public class ItemListController {
     }
 
     @GetMapping
-    public List<ItemListDto> getAll() {
-        return itemListService.findAll();
+    public List<ItemListDto> getAll(@CurrentUser User user) {
+        return itemListService.findAllByUser(user);
     }
 
     @PostMapping

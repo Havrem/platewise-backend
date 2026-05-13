@@ -9,8 +9,7 @@ import java.util.Optional;
 
 public interface ItemListRepository extends JpaRepository<ItemList, Long> {
     @EntityGraph(attributePaths = "category")
-    @Override
-    List<ItemList> findAll();
+    List<ItemList> findAllByCategoryUserId(Long userId);
 
     @EntityGraph(attributePaths = "category")
     @Override

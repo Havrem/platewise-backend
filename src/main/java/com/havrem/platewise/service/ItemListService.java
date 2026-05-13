@@ -1,10 +1,12 @@
 package com.havrem.platewise.service;
 
+import com.havrem.platewise.config.CurrentUser;
 import com.havrem.platewise.dto.request.CreateItemListRequest;
 import com.havrem.platewise.dto.request.UpdateItemListRequest;
 import com.havrem.platewise.dto.response.ItemListDto;
 import com.havrem.platewise.entity.Category;
 import com.havrem.platewise.entity.ItemList;
+import com.havrem.platewise.entity.User;
 import com.havrem.platewise.exception.NotFoundException;
 import com.havrem.platewise.mapper.ItemListMapper;
 import com.havrem.platewise.repository.ItemListRepository;
@@ -30,8 +32,8 @@ public class ItemListService {
         return itemListMapper.toDto(itemList);
     }
 
-    public List<ItemListDto> findAll() {
-        List<ItemList> itemLists = itemListRepository.findAll();
+    public List<ItemListDto> findAllByUser(@CurrentUser User user) {
+        List<ItemList> itemLists = itemListRepository.findAllByCategoryUserId(user.getId());
 
         return itemListMapper.toDtos(itemLists);
     }

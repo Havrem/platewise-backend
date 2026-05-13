@@ -15,9 +15,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String email;
-    private String password_hash;
+    private String passwordHash;
 
     public User() {
+    }
+
+    public User(String email, String passwordHash) {
+        this.email = email;
+        this.passwordHash = passwordHash;
     }
 
     public Long getId() {
@@ -28,6 +33,22 @@ public class User implements UserDetails {
         this.id = id;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -35,7 +56,7 @@ public class User implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return password_hash;
+        return passwordHash;
     }
 
     @Override
