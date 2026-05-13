@@ -10,7 +10,19 @@ public class Item {
     private Long Id;
 
     private String text;
-    private Boolean isDone;
+    private Boolean completed;
+
+    @ManyToOne
+    @JoinColumn(name = "item_list_id")
+    private ItemList itemList;
+
+    public ItemList getItemList() {
+        return itemList;
+    }
+
+    public void setItemList(ItemList itemList) {
+        this.itemList = itemList;
+    }
 
     public enum Type {
         BULLET, CHECK, NUMBERED, NONE
@@ -19,9 +31,9 @@ public class Item {
     protected Item() {
     }
 
-    public Item(String text, Boolean isDone) {
+    public Item(String text, Boolean completed) {
         this.text = text;
-        this.isDone = isDone;
+        this.completed = completed;
     }
 
     public Long getId() {
@@ -40,11 +52,11 @@ public class Item {
         this.text = text;
     }
 
-    public Boolean getDone() {
-        return isDone;
+    public Boolean getCompleted() {
+        return completed;
     }
 
-    public void setDone(Boolean done) {
-        isDone = done;
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
     }
 }

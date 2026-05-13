@@ -20,7 +20,7 @@ public class ItemList {
 
     private boolean bookmarked;
 
-    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
     protected ItemList() {
