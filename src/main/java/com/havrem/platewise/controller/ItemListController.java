@@ -1,9 +1,9 @@
 package com.havrem.platewise.controller;
 
 import com.havrem.platewise.config.CurrentUser;
-import com.havrem.platewise.dto.request.CreateItemListRequest;
-import com.havrem.platewise.dto.request.UpdateItemListRequest;
-import com.havrem.platewise.dto.response.ItemListDto;
+import com.havrem.platewise.dto.itemList.CreateItemListRequest;
+import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
+import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.service.ItemListService;
 import jakarta.validation.Valid;
@@ -21,30 +21,30 @@ public class ItemListController {
         this.itemListService = itemListService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ItemListDto create(@CurrentUser User user, @Valid @RequestBody CreateItemListRequest request) {
+        return itemListService.create(user, request);
+    }
+
     @GetMapping("/{id}")
-    public ItemListDto get(@PathVariable Long id) {
-        return itemListService.findById(id);
+    public ItemListDto read(@CurrentUser User user, @PathVariable Long id) {
+        return itemListService.read(user, id);
     }
 
     @GetMapping
-    public List<ItemListDto> getAll(@CurrentUser User user) {
-        return itemListService.findAllByUser(user);
+    public List<ItemListDto> readAll(@CurrentUser User user) {
+        return itemListService.readAll(user);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ItemListDto create(@Valid @RequestBody CreateItemListRequest request) {
-        return itemListService.create(request);
+    @PutMapping("/{id}")
+    public ItemListDto update(@CurrentUser User user, @PathVariable Long id, @Valid @RequestBody UpdateItemListRequest request) {
+        return itemListService.update(user, id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        itemListService.deleteById(id);
-    }
-
-    @PutMapping("/{id}")
-    public ItemListDto update(@PathVariable Long id, @Valid @RequestBody UpdateItemListRequest request) {
-        return itemListService.update(id, request);
+    public void delete(@CurrentUser User user, @PathVariable Long id) {
+        itemListService.delete(user, id);
     }
 }

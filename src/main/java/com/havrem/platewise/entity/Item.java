@@ -7,12 +7,12 @@ import jakarta.persistence.*;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private String text;
     private Boolean completed;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_list_id")
     private ItemList itemList;
 
@@ -25,23 +25,33 @@ public class Item {
     }
 
     public enum Type {
-        BULLET, CHECK, NUMBERED, NONE
+        BULLET, CHECKED, NUMBERED, NONE
     }
+
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     protected Item() {
     }
 
-    public Item(String text, Boolean completed) {
+    public Item(String text, Boolean completed, ItemList itemList, User user, Type type) {
         this.text = text;
         this.completed = completed;
+        this.itemList = itemList;
+        this.user = user;
+        this.type = type;
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getText() {
@@ -58,5 +68,21 @@ public class Item {
 
     public void setCompleted(Boolean completed) {
         this.completed = completed;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

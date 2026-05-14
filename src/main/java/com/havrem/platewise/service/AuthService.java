@@ -1,12 +1,12 @@
 package com.havrem.platewise.service;
 
-import com.havrem.platewise.dto.request.LoginRequest;
-import com.havrem.platewise.dto.request.SignupRequest;
-import com.havrem.platewise.dto.response.AuthResponse;
+import com.havrem.platewise.dto.auth.LoginRequest;
+import com.havrem.platewise.dto.auth.SignupRequest;
+import com.havrem.platewise.dto.auth.AuthResponse;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.exception.ConflictException;
 import com.havrem.platewise.exception.UnauthorizedException;
-import com.havrem.platewise.mapper.UserRepository;
+import com.havrem.platewise.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,8 +1,8 @@
 package com.havrem.platewise.controller;
 
-import com.havrem.platewise.dto.request.LoginRequest;
-import com.havrem.platewise.dto.request.SignupRequest;
-import com.havrem.platewise.dto.response.AuthResponse;
+import com.havrem.platewise.dto.auth.LoginRequest;
+import com.havrem.platewise.dto.auth.SignupRequest;
+import com.havrem.platewise.dto.auth.AuthResponse;
 import com.havrem.platewise.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse login(@Valid @RequestBody SignupRequest request) {
+    public AuthResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request);
     }
 

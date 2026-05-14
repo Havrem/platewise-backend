@@ -1,6 +1,6 @@
 package com.havrem.platewise.mapper;
 
-import com.havrem.platewise.dto.response.ItemListDto;
+import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.entity.ItemList;
 import org.mapstruct.Mapper;
 

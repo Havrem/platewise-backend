@@ -7,9 +7,13 @@ import jakarta.persistence.*;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
     private String name;
     private String icon;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public enum Type {
         GROCERY,
@@ -17,20 +21,25 @@ public class Category {
         GENERAL
     }
 
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
     protected Category() {
     }
 
-    public Category(String name, String icon) {
+    public Category(String name, String icon, User user, Type type) {
         this.name = name;
         this.icon = icon;
+        this.user = user;
+        this.type = type;
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+       this.id = id;
     }
 
     public String getName() {
@@ -47,5 +56,21 @@ public class Category {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }

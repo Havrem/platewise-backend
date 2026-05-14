@@ -14,7 +14,7 @@ public class ItemList {
 
     private String title;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -23,13 +23,18 @@ public class ItemList {
     @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     protected ItemList() {
     }
 
-    public ItemList(String title, Category category, boolean bookmarked) {
+    public ItemList(String title, Category category, boolean bookmarked, User user) {
         this.title = title;
         this.category = category;
         this.bookmarked = bookmarked;
+        this.user = user;
     }
 
     public Long getId() {
@@ -70,5 +75,17 @@ public class ItemList {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    public boolean isBookmarked() {
+        return bookmarked;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

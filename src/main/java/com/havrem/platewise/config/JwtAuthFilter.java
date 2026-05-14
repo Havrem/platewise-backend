@@ -1,6 +1,6 @@
 package com.havrem.platewise.config;
 
-import com.havrem.platewise.mapper.UserRepository;
+import com.havrem.platewise.repository.UserRepository;
 import com.havrem.platewise.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

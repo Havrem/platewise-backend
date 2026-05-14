@@ -1,4 +1,4 @@
-package com.havrem.platewise.dto.response;
+package com.havrem.platewise.dto.item;
 
 import com.havrem.platewise.entity.Item;
 

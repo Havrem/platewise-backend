@@ -1,4 +1,4 @@
-package com.havrem.platewise.mapper;
+package com.havrem.platewise.repository;
 
 import com.havrem.platewise.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
