@@ -3,7 +3,7 @@ package com.havrem.platewise.service;
 import com.havrem.platewise.dto.user.ChangePasswordRequest;
 import com.havrem.platewise.dto.user.UserDto;
 import com.havrem.platewise.entity.User;
-import com.havrem.platewise.exception.UnauthorizedException;
+import com.havrem.platewise.exception.BadRequestException;
 import com.havrem.platewise.mapper.UserMapper;
 import com.havrem.platewise.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +29,7 @@ public class UserService {
     @Transactional
     public void changePassword(User user, ChangePasswordRequest request) {
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
-            throw new UnauthorizedException("Current password is incorrect.");
+            throw new BadRequestException("Current password is incorrect.");
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));

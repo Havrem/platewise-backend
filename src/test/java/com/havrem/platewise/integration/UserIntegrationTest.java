@@ -49,7 +49,7 @@ class UserIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    void changePassword_wrongCurrentPassword_returns401() {
+    void changePassword_wrongCurrentPassword_returns400() {
         String token = signupAndGetToken(uniqueEmail());
 
         client.patch().uri("/users/me/password")
@@ -57,7 +57,7 @@ class UserIntegrationTest extends IntegrationTestBase {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ChangePasswordRequest("wrong-current-password", "newpassword456"))
                 .exchange()
-                .expectStatus().isUnauthorized();
+                .expectStatus().isBadRequest();
     }
 
     @Test
