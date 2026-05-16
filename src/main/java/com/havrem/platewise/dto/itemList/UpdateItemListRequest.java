@@ -1,4 +1,12 @@
 package com.havrem.platewise.dto.itemList;
 
-public record UpdateItemListRequest(String title, Long category, boolean bookmarked) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record UpdateItemListRequest(
+        @NotBlank @Size(max = 500) String title,
+        @NotNull Long category,
+        boolean bookmarked
+) {
 }

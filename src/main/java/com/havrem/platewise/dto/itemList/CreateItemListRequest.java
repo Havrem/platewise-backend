@@ -1,4 +1,11 @@
 package com.havrem.platewise.dto.itemList;
 
-public record CreateItemListRequest(String title, Long category) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record CreateItemListRequest(
+        @NotBlank @Size(max = 500) String title,
+        @NotNull Long category
+) {
 }
