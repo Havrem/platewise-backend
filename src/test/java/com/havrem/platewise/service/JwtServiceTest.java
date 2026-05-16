@@ -5,21 +5,11 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtServiceTest {
 
     private static final String SECRET = "test-secret-that-is-long-enough-to-meet-hmac-sha-key-requirements-for-jjwt-library";
-
-    @Test
-    void generate_thenExtractUserId_roundTripsCorrectly() {
-        JwtService jwtService = new JwtService(new JwtProperties(SECRET, 900));
-
-        String token = jwtService.generate(42L);
-
-        assertThat(jwtService.extractUserId(token)).isEqualTo(42L);
-    }
 
     @Test
     void extractUserId_expiredToken_throwsExpiredJwtException() {

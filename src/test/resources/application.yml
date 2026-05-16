@@ -1,0 +1,4 @@
+app:
+  jwt:
+    secret: test-secret-that-is-long-enough-to-meet-hmac-sha-key-requirements-for-jjwt-library
+    access-ttl-seconds: 900
