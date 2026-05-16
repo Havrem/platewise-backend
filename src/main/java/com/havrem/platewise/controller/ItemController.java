@@ -37,7 +37,7 @@ public class ItemController {
         return itemService.readAll(user);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ItemDto update(@CurrentUser User user, @PathVariable Long id, @Valid @RequestBody UpdateItemRequest request) {
         return itemService.update(user, id, request);
     }

@@ -95,28 +95,28 @@ class AuthIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    void protectedEndpoint_withoutToken_returns403() {
+    void protectedEndpoint_withoutToken_returns401() {
         client.get().uri("/categories")
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isUnauthorized();
     }
 
     @Test
-    void protectedEndpoint_withGarbageToken_returns403() {
+    void protectedEndpoint_withGarbageToken_returns401() {
         client.get().uri("/categories")
                 .header("Authorization", "Bearer garbage-token-data")
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isUnauthorized();
     }
 
     @Test
-    void protectedEndpoint_withExpiredToken_returns403() {
+    void protectedEndpoint_withExpiredToken_returns401() {
         JwtService expiredTokenIssuer = new JwtService(new JwtProperties(jwtProperties.secret(), -1));
         String expiredToken = expiredTokenIssuer.generate(1L);
 
         client.get().uri("/categories")
                 .header("Authorization", "Bearer " + expiredToken)
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isUnauthorized();
     }
 }

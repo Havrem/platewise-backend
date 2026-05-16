@@ -58,11 +58,10 @@ public class ItemListService {
     public ItemListDto update(User user, Long id, UpdateItemListRequest request) {
         ItemList itemList = find(user, id);
 
-        Category category = categoryService.find(user, request.category());
-
-        itemList.setTitle(request.title());
-        itemList.setCategory(category);
-        itemList.setBookmarked(request.bookmarked());
+        itemListMapper.update(itemList, request);
+        if (request.category() != null) {
+            itemList.setCategory(categoryService.find(user, request.category()));
+        }
 
         itemListRepository.save(itemList);
 

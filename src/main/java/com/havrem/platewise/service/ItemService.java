@@ -54,9 +54,7 @@ public class ItemService {
     public ItemDto update(User user, Long id, UpdateItemRequest request) {
         Item item = find(user, id);
 
-        item.setText(request.text());
-        item.setCompleted(request.completed());
-        item.setType(request.type());
+        itemMapper.update(item, request);
 
         itemRepository.save(item);
 

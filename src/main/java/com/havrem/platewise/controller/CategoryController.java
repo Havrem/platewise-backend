@@ -37,7 +37,7 @@ public class CategoryController {
         return categoryService.readAll(user);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public CategoryDto update(@CurrentUser User user, @PathVariable Long id, @Valid @RequestBody UpdateCategoryRequest request) {
         return categoryService.update(user, id, request);
     }

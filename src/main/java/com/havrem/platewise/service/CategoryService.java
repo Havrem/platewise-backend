@@ -49,9 +49,7 @@ public class CategoryService {
     public CategoryDto update(User user, Long id, UpdateCategoryRequest request) {
         Category category = find(user, id);
 
-        category.setName(request.name());
-        category.setIcon(request.icon());
-        category.setType(request.type());
+        categoryMapper.update(category, request);
 
         categoryRepository.save(category);
 

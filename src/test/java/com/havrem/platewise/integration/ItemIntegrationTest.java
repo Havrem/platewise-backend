@@ -53,7 +53,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
                 .expectBody()
                 .jsonPath("$.length()").isEqualTo(1);
 
-        client.put().uri("/items/" + id)
+        client.patch().uri("/items/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateItemRequest("Whole milk", true, Item.Type.CHECKED))
@@ -88,7 +88,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        client.put().uri("/items/" + itemIdA)
+        client.patch().uri("/items/" + itemIdA)
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateItemRequest("hijacked", true, Item.Type.CHECKED))

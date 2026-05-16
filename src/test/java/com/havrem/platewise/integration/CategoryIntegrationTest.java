@@ -44,7 +44,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
                 .expectBody()
                 .jsonPath("$.length()").isEqualTo(1);
 
-        client.put().uri("/categories/" + id)
+        client.patch().uri("/categories/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateCategoryRequest("Renamed", "icon", Category.Type.RECIPES))
@@ -88,7 +88,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        client.put().uri("/categories/" + idA)
+        client.patch().uri("/categories/" + idA)
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateCategoryRequest("hijacked", "icon", Category.Type.GROCERY))

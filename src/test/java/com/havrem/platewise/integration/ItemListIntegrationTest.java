@@ -48,7 +48,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
                 .expectBody()
                 .jsonPath("$.length()").isEqualTo(1);
 
-        client.put().uri("/item-lists/" + id)
+        client.patch().uri("/item-lists/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateItemListRequest("Renamed", categoryId, true))
@@ -83,7 +83,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        client.put().uri("/item-lists/" + itemListIdA)
+        client.patch().uri("/item-lists/" + itemListIdA)
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new UpdateItemListRequest("hijacked", categoryIdB, true))
