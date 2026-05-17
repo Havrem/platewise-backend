@@ -2,10 +2,14 @@ package com.havrem.platewise.integration;
 
 import com.havrem.platewise.dto.category.CategoryDto;
 import com.havrem.platewise.dto.category.CreateCategoryRequest;
+import com.havrem.platewise.dto.item.CreateItemRequest;
+import com.havrem.platewise.dto.item.ItemDto;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
+import com.havrem.platewise.dto.itemList.ImportItemsRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.dto.itemList.ReorderItemListRequest;
 import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
+import com.havrem.platewise.entity.Item;
 import com.havrem.platewise.entity.ItemList;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -200,6 +204,73 @@ class ItemListIntegrationTest extends IntegrationTestBase {
                 .expectStatus().isBadRequest();
     }
 
+    @Test
+    void importItems_copiesSourceItemsIntoTargetList() {
+        String token = signupAndGetToken(uniqueEmail());
+        Long categoryId = createCategory(token, "Groceries");
+        Long sourceId = createItemList(token, "Template", categoryId);
+        Long targetId = createItemList(token, "Weekly", categoryId);
+
+        createItem(token, "Existing", false, Item.Type.NONE, targetId);
+        Long milkId = createItem(token, "Milk", true, Item.Type.CHECKED, sourceId);
+        Long breadId = createItem(token, "Bread", false, Item.Type.BULLET, sourceId);
+
+        ItemListDto imported = client.post().uri("/item-lists/" + targetId + "/items/import")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ImportItemsRequest(sourceId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ItemListDto.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(imported).isNotNull();
+        assertThat(imported.items()).extracting(ItemDto::text).containsExactly("Existing", "Milk", "Bread");
+        assertThat(imported.items()).extracting(ItemDto::completed).containsExactly(false, true, false);
+        assertThat(imported.items()).extracting(ItemDto::type).containsExactly(Item.Type.NONE, Item.Type.CHECKED, Item.Type.BULLET);
+        assertThat(imported.items().get(1).id()).isNotEqualTo(milkId);
+        assertThat(imported.items().get(2).id()).isNotEqualTo(breadId);
+
+        client.get().uri("/item-lists/" + sourceId)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.items.length()").isEqualTo(2);
+    }
+
+    @Test
+    void importItems_sameSourceAndTarget_returns400() {
+        String token = signupAndGetToken(uniqueEmail());
+        Long categoryId = createCategory(token, "Groceries");
+        Long listId = createItemList(token, "Weekly", categoryId);
+
+        client.post().uri("/item-lists/" + listId + "/items/import")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ImportItemsRequest(listId))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void importItems_userCannotImportFromInaccessibleSource() {
+        String tokenA = signupAndGetToken(uniqueEmail());
+        String tokenB = signupAndGetToken(uniqueEmail());
+        Long categoryA = createCategory(tokenA, "A");
+        Long categoryB = createCategory(tokenB, "B");
+        Long sourceIdA = createItemList(tokenA, "A source", categoryA);
+        Long targetIdB = createItemList(tokenB, "B target", categoryB);
+
+        client.post().uri("/item-lists/" + targetIdB + "/items/import")
+                .header("Authorization", "Bearer " + tokenB)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ImportItemsRequest(sourceIdA))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
     private Long createCategory(String token, String name) {
         CategoryDto created = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
@@ -222,6 +293,20 @@ class ItemListIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemListDto.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(created).isNotNull();
+        return created.id();
+    }
+
+    private Long createItem(String token, String text, Boolean completed, Item.Type type, Long itemListId) {
+        ItemDto created = client.post().uri("/items")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new CreateItemRequest(text, completed, type, itemListId))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ItemDto.class)
                 .returnResult()
                 .getResponseBody();
         assertThat(created).isNotNull();

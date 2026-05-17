@@ -2,10 +2,12 @@ package com.havrem.platewise.service;
 
 import com.havrem.platewise.dto.category.CategoryDto;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
+import com.havrem.platewise.dto.itemList.ImportItemsRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.dto.itemList.ReorderItemListRequest;
 import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
 import com.havrem.platewise.entity.Category;
+import com.havrem.platewise.entity.Item;
 import com.havrem.platewise.entity.ItemList;
 import com.havrem.platewise.entity.ListMember;
 import com.havrem.platewise.entity.User;
@@ -14,6 +16,7 @@ import com.havrem.platewise.exception.NotFoundException;
 import com.havrem.platewise.mapper.CategoryMapper;
 import com.havrem.platewise.mapper.ItemListMapper;
 import com.havrem.platewise.repository.CategoryRepository;
+import com.havrem.platewise.repository.ItemRepository;
 import com.havrem.platewise.repository.ItemListRepository;
 import com.havrem.platewise.repository.ListMemberRepository;
 import com.havrem.platewise.util.LexoRank;
@@ -26,6 +29,7 @@ import java.util.List;
 public class ItemListService {
     private final ItemListRepository itemListRepository;
     private final ItemListMapper itemListMapper;
+    private final ItemRepository itemRepository;
     private final CategoryService categoryService;
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
@@ -34,6 +38,7 @@ public class ItemListService {
 
     public ItemListService(ItemListRepository itemListRepository,
                            ItemListMapper itemListMapper,
+                           ItemRepository itemRepository,
                            CategoryService categoryService,
                            CategoryRepository categoryRepository,
                            CategoryMapper categoryMapper,
@@ -41,6 +46,7 @@ public class ItemListService {
                            RealtimeBroadcaster broadcaster) {
         this.itemListRepository = itemListRepository;
         this.itemListMapper = itemListMapper;
+        this.itemRepository = itemRepository;
         this.categoryService = categoryService;
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
@@ -82,6 +88,43 @@ public class ItemListService {
         listMemberRepository.save(new ListMember(itemList, user, true));
 
         return toDtoForUser(itemList, user);
+    }
+
+    @Transactional
+    public ItemListDto importItems(User user, Long targetId, ImportItemsRequest request) {
+        ItemList target = find(user, targetId);
+        ItemList source = find(user, request.sourceListId());
+
+        if (target.getId().equals(source.getId())) {
+            throw new BadRequestException("Source list must be different from target list.");
+        }
+
+        List<Item> sourceItems = itemRepository.findAllByItemListIdOrderByRankAsc(source.getId());
+        String lastRank = itemRepository
+                .findFirstByItemListIdOrderByRankDesc(target.getId())
+                .map(Item::getRank)
+                .orElse(null);
+
+        List<Item> targetItems = target.getItems();
+        for (Item sourceItem : sourceItems) {
+            lastRank = LexoRank.between(lastRank, null);
+            Item copy = new Item(
+                    sourceItem.getText(),
+                    sourceItem.getCompleted(),
+                    target,
+                    user,
+                    sourceItem.getType(),
+                    lastRank
+            );
+            itemRepository.save(copy);
+            targetItems.add(copy);
+        }
+
+        if (!sourceItems.isEmpty()) {
+            broadcaster.listChanged(target.getId());
+        }
+
+        return toDtoForUser(target, user);
     }
 
     @Transactional

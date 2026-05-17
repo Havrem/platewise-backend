@@ -16,4 +16,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllForMember(@Param("userId") Long userId);
 
     Optional<Item> findFirstByItemListIdOrderByRankDesc(Long itemListId);
+
+    List<Item> findAllByItemListIdOrderByRankAsc(Long itemListId);
 }
