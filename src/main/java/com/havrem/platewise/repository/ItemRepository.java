@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findByUserIdAndId(Long userId, Long id);
-    List<Item> findAllByUserId(Long userId);
+    List<Item> findAllByUserIdOrderByRankAsc(Long userId);
+    Optional<Item> findFirstByUserIdAndItemListIdOrderByRankDesc(Long userId, Long itemListId);
 }

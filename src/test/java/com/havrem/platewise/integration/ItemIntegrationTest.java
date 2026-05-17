@@ -4,6 +4,7 @@ import com.havrem.platewise.dto.category.CategoryDto;
 import com.havrem.platewise.dto.category.CreateCategoryRequest;
 import com.havrem.platewise.dto.item.CreateItemRequest;
 import com.havrem.platewise.dto.item.ItemDto;
+import com.havrem.platewise.dto.item.ReorderItemRequest;
 import com.havrem.platewise.dto.item.UpdateItemRequest;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
@@ -114,6 +115,69 @@ class ItemIntegrationTest extends IntegrationTestBase {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.length()").isEqualTo(0);
+    }
+
+    @Test
+    void create_appendsToEndOfItemListByRank() {
+        String token = signupAndGetToken(uniqueEmail());
+        Long categoryId = createCategory(token, "Groceries");
+        Long itemListId = createItemList(token, "Weekly", categoryId);
+
+        Long firstId = createItem(token, "First", itemListId);
+        Long secondId = createItem(token, "Second", itemListId);
+        Long thirdId = createItem(token, "Third", itemListId);
+
+        client.get().uri("/items")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(firstId)
+                .jsonPath("$[1].id").isEqualTo(secondId)
+                .jsonPath("$[2].id").isEqualTo(thirdId);
+    }
+
+    @Test
+    void reorder_movesItemBetweenNeighbors() {
+        String token = signupAndGetToken(uniqueEmail());
+        Long categoryId = createCategory(token, "Groceries");
+        Long itemListId = createItemList(token, "Weekly", categoryId);
+        Long firstId = createItem(token, "First", itemListId);
+        Long secondId = createItem(token, "Second", itemListId);
+        Long thirdId = createItem(token, "Third", itemListId);
+
+        client.patch().uri("/items/" + firstId + "/order")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ReorderItemRequest(secondId, thirdId))
+                .exchange()
+                .expectStatus().isOk();
+
+        client.get().uri("/items")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(secondId)
+                .jsonPath("$[1].id").isEqualTo(firstId)
+                .jsonPath("$[2].id").isEqualTo(thirdId);
+    }
+
+    @Test
+    void reorder_neighborInDifferentItemList_returns400() {
+        String token = signupAndGetToken(uniqueEmail());
+        Long categoryId = createCategory(token, "Groceries");
+        Long listA = createItemList(token, "List A", categoryId);
+        Long listB = createItemList(token, "List B", categoryId);
+        Long itemInA = createItem(token, "In A", listA);
+        Long itemInB = createItem(token, "In B", listB);
+
+        client.patch().uri("/items/" + itemInA + "/order")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ReorderItemRequest(itemInB, null))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     private Long createCategory(String token, String name) {

@@ -35,15 +35,18 @@ public class Item {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String rank;
+
     protected Item() {
     }
 
-    public Item(String text, Boolean completed, ItemList itemList, User user, Type type) {
+    public Item(String text, Boolean completed, ItemList itemList, User user, Type type, String rank) {
         this.text = text;
         this.completed = completed;
         this.itemList = itemList;
         this.user = user;
         this.type = type;
+        this.rank = rank;
     }
 
     public Long getId() {
@@ -84,5 +87,13 @@ public class Item {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }

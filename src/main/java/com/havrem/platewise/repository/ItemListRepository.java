@@ -9,8 +9,10 @@ import java.util.Optional;
 
 public interface ItemListRepository extends JpaRepository<ItemList, Long> {
     @EntityGraph(attributePaths = {"category", "items"})
-    List<ItemList> findAllByUserId(Long userId);
+    List<ItemList> findAllByUserIdOrderByRankAsc(Long userId);
 
     @EntityGraph(attributePaths = {"category", "items"})
     Optional<ItemList> findByUserIdAndId(Long userId, Long id);
+
+    Optional<ItemList> findFirstByUserIdAndCategoryIdOrderByRankDesc(Long userId, Long categoryId);
 }

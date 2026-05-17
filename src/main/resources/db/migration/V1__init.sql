@@ -21,6 +21,7 @@ create table item_lists (
     title varchar(500) not null,
     category_id bigint not null references categories(id) on delete restrict,
     bookmarked boolean not null default false,
+    rank varchar(64) not null,
     user_id bigint not null references users(id) on delete cascade,
     created_at timestamptz not null default now(),
     updated_at timestamptz
@@ -32,12 +33,17 @@ create table items (
     user_id bigint not null references users(id) on delete cascade,
     type varchar(100) not null check (type in ('BULLET', 'CHECKED', 'NUMBERED', 'NONE')),
     text varchar(500),
-    completed boolean not null default false
+    completed boolean not null default false,
+    rank varchar(64) not null
 );
 
 create index idx_item_lists_category_id on item_lists(category_id);
 
+create index idx_item_lists_user_category_rank on item_lists(user_id, category_id, rank);
+
 create index idx_items_list_id on items(item_list_id);
+
+create index idx_items_user_list_rank on items(user_id, item_list_id, rank);
 
 create index idx_categories_user_id on categories(user_id);
 

@@ -3,6 +3,7 @@ package com.havrem.platewise.controller;
 import com.havrem.platewise.config.CurrentUser;
 import com.havrem.platewise.dto.item.CreateItemRequest;
 import com.havrem.platewise.dto.item.ItemDto;
+import com.havrem.platewise.dto.item.ReorderItemRequest;
 import com.havrem.platewise.dto.item.UpdateItemRequest;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.service.ItemService;
@@ -40,6 +41,11 @@ public class ItemController {
     @PatchMapping("/{id}")
     public ItemDto update(@CurrentUser User user, @PathVariable Long id, @Valid @RequestBody UpdateItemRequest request) {
         return itemService.update(user, id, request);
+    }
+
+    @PatchMapping("/{id}/order")
+    public ItemDto reorder(@CurrentUser User user, @PathVariable Long id, @RequestBody ReorderItemRequest request) {
+        return itemService.reorder(user, id, request);
     }
 
     @DeleteMapping("/{id}")

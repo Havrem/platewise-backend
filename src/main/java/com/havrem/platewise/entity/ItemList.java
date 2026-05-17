@@ -20,7 +20,10 @@ public class ItemList {
 
     private boolean bookmarked;
 
+    private String rank;
+
     @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("rank ASC")
     private List<Item> items = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,10 +33,11 @@ public class ItemList {
     protected ItemList() {
     }
 
-    public ItemList(String title, Category category, boolean bookmarked, User user) {
+    public ItemList(String title, Category category, boolean bookmarked, String rank, User user) {
         this.title = title;
         this.category = category;
         this.bookmarked = bookmarked;
+        this.rank = rank;
         this.user = user;
     }
 
@@ -67,6 +71,14 @@ public class ItemList {
 
     public void setBookmarked(boolean bookmarked) {
         this.bookmarked = bookmarked;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 
     public List<Item> getItems() {

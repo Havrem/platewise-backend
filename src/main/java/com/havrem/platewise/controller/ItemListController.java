@@ -2,8 +2,9 @@ package com.havrem.platewise.controller;
 
 import com.havrem.platewise.config.CurrentUser;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
-import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
+import com.havrem.platewise.dto.itemList.ReorderItemListRequest;
+import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.service.ItemListService;
 import jakarta.validation.Valid;
@@ -40,6 +41,11 @@ public class ItemListController {
     @PatchMapping("/{id}")
     public ItemListDto update(@CurrentUser User user, @PathVariable Long id, @Valid @RequestBody UpdateItemListRequest request) {
         return itemListService.update(user, id, request);
+    }
+
+    @PatchMapping("/{id}/order")
+    public ItemListDto reorder(@CurrentUser User user, @PathVariable Long id, @RequestBody ReorderItemListRequest request) {
+        return itemListService.reorder(user, id, request);
     }
 
     @DeleteMapping("/{id}")
