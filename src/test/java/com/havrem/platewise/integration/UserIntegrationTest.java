@@ -3,7 +3,6 @@ package com.havrem.platewise.integration;
 import com.havrem.platewise.dto.auth.LoginRequest;
 import com.havrem.platewise.dto.category.CreateCategoryRequest;
 import com.havrem.platewise.dto.user.ChangePasswordRequest;
-import com.havrem.platewise.entity.Category;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -68,7 +67,7 @@ class UserIntegrationTest extends IntegrationTestBase {
         client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest("Groceries", "icon", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest("Groceries", "icon"))
                 .exchange()
                 .expectStatus().isCreated();
 

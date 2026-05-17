@@ -8,8 +8,8 @@ import com.havrem.platewise.dto.item.ReorderItemRequest;
 import com.havrem.platewise.dto.item.UpdateItemRequest;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
-import com.havrem.platewise.entity.Category;
 import com.havrem.platewise.entity.Item;
+import com.havrem.platewise.entity.ItemList;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -184,7 +184,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         CategoryDto created = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest(name, "icon", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest(name, "icon"))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CategoryDto.class)
@@ -198,7 +198,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         ItemListDto created = client.post().uri("/item-lists")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemListRequest(title, categoryId))
+                .body(new CreateItemListRequest(title, categoryId, ItemList.Type.GROCERY))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemListDto.class)

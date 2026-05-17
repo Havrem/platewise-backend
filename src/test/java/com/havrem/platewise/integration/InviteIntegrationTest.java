@@ -7,6 +7,7 @@ import com.havrem.platewise.dto.invite.InviteDto;
 import com.havrem.platewise.dto.itemList.CreateItemListRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.entity.Category;
+import com.havrem.platewise.entity.ItemList;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -60,6 +61,7 @@ class InviteIntegrationTest extends IntegrationTestBase {
                 .getResponseBody();
         assertThat(bView).isNotNull();
         assertThat(bView.title()).isEqualTo("Weekly");
+        assertThat(bView.type()).isEqualTo(ItemList.Type.GROCERY);
         // B sees the list under their own Shared category, not A's "Groceries"
         assertThat(bView.category().kind()).isEqualTo(Category.Kind.SHARED);
 
@@ -149,7 +151,7 @@ class InviteIntegrationTest extends IntegrationTestBase {
         CategoryDto created = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest(name, "icon", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest(name, "icon"))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CategoryDto.class)
@@ -163,7 +165,7 @@ class InviteIntegrationTest extends IntegrationTestBase {
         ItemListDto created = client.post().uri("/item-lists")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemListRequest(title, categoryId))
+                .body(new CreateItemListRequest(title, categoryId, ItemList.Type.GROCERY))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemListDto.class)

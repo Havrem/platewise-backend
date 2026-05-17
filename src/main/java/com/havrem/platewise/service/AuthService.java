@@ -38,7 +38,7 @@ public class AuthService {
         User user = new User(request.email(), passwordEncoder.encode(request.password()));
         User saved = userRepository.save(user);
 
-        categoryRepository.save(new Category("Shared", "shared", saved, Category.Type.GENERAL, Category.Kind.SHARED));
+        categoryRepository.save(new Category("Shared", "shared", saved, Category.Kind.SHARED));
 
         return issueTokens(saved);
     }

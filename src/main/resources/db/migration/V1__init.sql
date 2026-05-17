@@ -22,7 +22,6 @@ create table categories (
     user_id bigint not null references users(id) on delete cascade,
     name varchar(100) not null,
     icon varchar(100) not null,
-    type varchar(100) not null check (type in ('GROCERY', 'RECIPES', 'GENERAL')),
     kind varchar(20) not null default 'USER' check (kind in ('USER', 'SHARED')),
     created_at timestamptz not null default now(),
     updated_at timestamptz
@@ -32,6 +31,7 @@ create table item_lists (
     id bigserial primary key,
     title varchar(500) not null,
     category_id bigint not null references categories(id) on delete restrict,
+    type varchar(100) not null check (type in ('GROCERY', 'RECIPES', 'GENERAL')),
     bookmarked boolean not null default false,
     rank varchar(64) not null,
     created_at timestamptz not null default now(),

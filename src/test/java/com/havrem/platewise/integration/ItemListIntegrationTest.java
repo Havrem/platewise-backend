@@ -6,7 +6,7 @@ import com.havrem.platewise.dto.itemList.CreateItemListRequest;
 import com.havrem.platewise.dto.itemList.ItemListDto;
 import com.havrem.platewise.dto.itemList.ReorderItemListRequest;
 import com.havrem.platewise.dto.itemList.UpdateItemListRequest;
-import com.havrem.platewise.entity.Category;
+import com.havrem.platewise.entity.ItemList;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -22,7 +22,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         ItemListDto created = client.post().uri("/item-lists")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemListRequest("Weekly", categoryId))
+                .body(new CreateItemListRequest("Weekly", categoryId, ItemList.Type.GROCERY))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemListDto.class)
@@ -40,6 +40,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
                 .jsonPath("$.id").isEqualTo(id)
                 .jsonPath("$.title").isEqualTo("Weekly")
                 .jsonPath("$.category.id").isEqualTo(categoryId)
+                .jsonPath("$.type").isEqualTo("GROCERY")
                 .jsonPath("$.bookmarked").isEqualTo(false);
 
         client.get().uri("/item-lists")
@@ -52,11 +53,12 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/item-lists/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new UpdateItemListRequest("Renamed", categoryId, true))
+                .body(new UpdateItemListRequest("Renamed", categoryId, ItemList.Type.RECIPES, true))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.title").isEqualTo("Renamed")
+                .jsonPath("$.type").isEqualTo("RECIPES")
                 .jsonPath("$.bookmarked").isEqualTo(true);
 
         client.delete().uri("/item-lists/" + id)
@@ -87,7 +89,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/item-lists/" + itemListIdA)
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new UpdateItemListRequest("hijacked", categoryIdB, true))
+                .body(new UpdateItemListRequest("hijacked", categoryIdB, ItemList.Type.GENERAL, true))
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -100,7 +102,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         client.post().uri("/item-lists")
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemListRequest("trying-to-steal-category", categoryIdA))
+                .body(new CreateItemListRequest("trying-to-steal-category", categoryIdA, ItemList.Type.GROCERY))
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -202,7 +204,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         CategoryDto created = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest(name, "icon", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest(name, "icon"))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CategoryDto.class)
@@ -216,7 +218,7 @@ class ItemListIntegrationTest extends IntegrationTestBase {
         ItemListDto created = client.post().uri("/item-lists")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemListRequest(title, categoryId))
+                .body(new CreateItemListRequest(title, categoryId, ItemList.Type.GROCERY))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemListDto.class)

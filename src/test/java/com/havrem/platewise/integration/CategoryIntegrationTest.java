@@ -3,7 +3,6 @@ package com.havrem.platewise.integration;
 import com.havrem.platewise.dto.category.CategoryDto;
 import com.havrem.platewise.dto.category.CreateCategoryRequest;
 import com.havrem.platewise.dto.category.UpdateCategoryRequest;
-import com.havrem.platewise.entity.Category;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -18,7 +17,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
         CategoryDto created = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest("Groceries", "shopping-cart", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest("Groceries", "shopping-cart"))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CategoryDto.class)
@@ -34,8 +33,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(id)
-                .jsonPath("$.name").isEqualTo("Groceries")
-                .jsonPath("$.type").isEqualTo("GROCERY");
+                .jsonPath("$.name").isEqualTo("Groceries");
 
         client.get().uri("/categories")
                 .header("Authorization", "Bearer " + token)
@@ -48,12 +46,11 @@ class CategoryIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/categories/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new UpdateCategoryRequest("Renamed", "icon", Category.Type.RECIPES))
+                .body(new UpdateCategoryRequest("Renamed", "icon"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.name").isEqualTo("Renamed")
-                .jsonPath("$.type").isEqualTo("RECIPES");
+                .jsonPath("$.name").isEqualTo("Renamed");
 
         client.delete().uri("/categories/" + id)
                 .header("Authorization", "Bearer " + token)
@@ -74,7 +71,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
         CategoryDto createdA = client.post().uri("/categories")
                 .header("Authorization", "Bearer " + tokenA)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateCategoryRequest("A's groceries", "icon", Category.Type.GROCERY))
+                .body(new CreateCategoryRequest("A's groceries", "icon"))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CategoryDto.class)
@@ -92,7 +89,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/categories/" + idA)
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new UpdateCategoryRequest("hijacked", "icon", Category.Type.GROCERY))
+                .body(new UpdateCategoryRequest("hijacked", "icon"))
                 .exchange()
                 .expectStatus().isNotFound();
 

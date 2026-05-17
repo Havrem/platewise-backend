@@ -77,7 +77,7 @@ public class ItemListService {
                 .orElse(null);
         String rank = LexoRank.between(lastRank, null);
 
-        ItemList itemList = new ItemList(request.title(), category, false, rank);
+        ItemList itemList = new ItemList(request.title(), category, request.type(), false, rank);
         itemListRepository.save(itemList);
         listMemberRepository.save(new ListMember(itemList, user, true));
 
@@ -135,9 +135,9 @@ public class ItemListService {
         ItemListDto dto = itemListMapper.toDto(list);
         if (isOwner(list, user)) return dto;
         Category sharedCategory = categoryRepository.findFirstByUserIdAndKind(user.getId(), Category.Kind.SHARED)
-                .orElseGet(() -> categoryRepository.save(new Category("Shared", "shared", user, Category.Type.GENERAL, Category.Kind.SHARED)));
+                .orElseGet(() -> categoryRepository.save(new Category("Shared", "shared", user, Category.Kind.SHARED)));
         CategoryDto sharedDto = categoryMapper.toDto(sharedCategory);
-        return new ItemListDto(dto.id(), dto.title(), sharedDto, dto.bookmarked(), dto.items());
+        return new ItemListDto(dto.id(), dto.title(), sharedDto, dto.type(), dto.bookmarked(), dto.items());
     }
 
     private String neighborRank(User user, ItemList target, Long neighborId) {

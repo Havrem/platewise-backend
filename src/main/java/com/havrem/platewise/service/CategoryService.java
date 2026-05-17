@@ -28,7 +28,7 @@ public class CategoryService {
     }
 
     public CategoryDto create(User user, CreateCategoryRequest request) {
-        Category category = new Category(request.name(), request.icon(), user, request.type());
+        Category category = new Category(request.name(), request.icon(), user);
 
         categoryRepository.save(category);
 

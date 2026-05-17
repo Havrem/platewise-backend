@@ -18,6 +18,15 @@ public class ItemList {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    public enum Type {
+        GROCERY,
+        RECIPES,
+        GENERAL
+    }
+
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
     private boolean bookmarked;
 
     private String rank;
@@ -32,9 +41,10 @@ public class ItemList {
     protected ItemList() {
     }
 
-    public ItemList(String title, Category category, boolean bookmarked, String rank) {
+    public ItemList(String title, Category category, Type type, boolean bookmarked, String rank) {
         this.title = title;
         this.category = category;
+        this.type = type;
         this.bookmarked = bookmarked;
         this.rank = rank;
     }
@@ -61,6 +71,14 @@ public class ItemList {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public boolean getBookmarked() {
