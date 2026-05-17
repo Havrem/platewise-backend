@@ -6,6 +6,17 @@ create table users (
     updated_at timestamptz
 );
 
+create table refresh_tokens (
+    id bigserial primary key,
+    token_hash varchar(255) unique not null,
+    user_id bigint not null references users(id) on delete cascade,
+    expires_at timestamptz not null,
+    created_at timestamptz not null default now()
+);
+
+create index idx_refresh_tokens_token_hash on refresh_tokens(token_hash);
+create index idx_refresh_tokens_user_id on refresh_tokens(user_id);
+
 create table categories (
     id bigserial primary key,
     user_id bigint not null references users(id) on delete cascade,

@@ -1,8 +1,8 @@
 package com.havrem.platewise.service;
 
+import com.havrem.platewise.dto.auth.AuthResponse;
 import com.havrem.platewise.dto.auth.LoginRequest;
 import com.havrem.platewise.dto.auth.SignupRequest;
-import com.havrem.platewise.dto.auth.AuthResponse;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.exception.ConflictException;
 import com.havrem.platewise.exception.UnauthorizedException;
@@ -16,11 +16,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -32,12 +34,10 @@ public class AuthService {
         User user = new User(request.email(), passwordEncoder.encode(request.password()));
         User saved = userRepository.save(user);
 
-        String token = jwtService.generate(saved.getId());
-
-        return new AuthResponse(token, saved.getId(), saved.getEmail());
+        return issueTokens(saved);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new UnauthorizedException("Invalid email or password."));
 
@@ -45,8 +45,24 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password.");
         }
 
-        String token = jwtService.generate(user.getId());
+        return issueTokens(user);
+    }
 
-        return new AuthResponse(token, user.getId(), user.getEmail());
+    @Transactional
+    public AuthResponse refresh(String refreshToken) {
+        RefreshTokenService.Rotated rotated = refreshTokenService.validateAndRotate(refreshToken);
+        String accessToken = jwtService.generate(rotated.user().getId());
+        return new AuthResponse(accessToken, rotated.rawToken(), rotated.user().getId(), rotated.user().getEmail());
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenService.delete(refreshToken);
+    }
+
+    private AuthResponse issueTokens(User user) {
+        String accessToken = jwtService.generate(user.getId());
+        String refreshToken = refreshTokenService.create(user);
+        return new AuthResponse(accessToken, refreshToken, user.getId(), user.getEmail());
     }
 }

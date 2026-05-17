@@ -25,6 +25,10 @@ public abstract class IntegrationTestBase {
     }
 
     protected String signupAndGetToken(String email) {
+        return signupAndGetAuth(email).accessToken();
+    }
+
+    protected AuthResponse signupAndGetAuth(String email) {
         AuthResponse response = client.post().uri("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new SignupRequest(email, "password123"))
@@ -33,6 +37,7 @@ public abstract class IntegrationTestBase {
                 .expectBody(AuthResponse.class)
                 .returnResult()
                 .getResponseBody();
-        return response.accessToken();
+        if (response == null) throw new IllegalStateException("signup returned empty body");
+        return response;
     }
 }

@@ -18,6 +18,7 @@ class AuthServiceTest {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private JwtService jwtService;
+    private RefreshTokenService refreshTokenService;
     private AuthService authService;
 
     @BeforeEach
@@ -25,7 +26,8 @@ class AuthServiceTest {
         userRepository = mock(UserRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         jwtService = mock(JwtService.class);
-        authService = new AuthService(userRepository, passwordEncoder, jwtService);
+        refreshTokenService = mock(RefreshTokenService.class);
+        authService = new AuthService(userRepository, passwordEncoder, jwtService, refreshTokenService);
     }
 
     @Test
@@ -38,6 +40,7 @@ class AuthServiceTest {
             return u;
         });
         when(jwtService.generate(42L)).thenReturn("token-abc");
+        when(refreshTokenService.create(any())).thenReturn("refresh-abc");
 
         authService.signup(new SignupRequest("a@b.com", "password123"));
 

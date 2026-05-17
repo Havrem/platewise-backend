@@ -13,7 +13,7 @@ class JwtServiceTest {
 
     @Test
     void extractUserId_expiredToken_throwsExpiredJwtException() {
-        JwtService jwtService = new JwtService(new JwtProperties(SECRET, -1));
+        JwtService jwtService = new JwtService(new JwtProperties(SECRET, -1, 2592000));
 
         String expiredToken = jwtService.generate(42L);
 
@@ -23,8 +23,8 @@ class JwtServiceTest {
 
     @Test
     void extractUserId_tokenSignedByDifferentSecret_throwsSignatureException() {
-        JwtService issuer = new JwtService(new JwtProperties(SECRET, 900));
-        JwtService verifier = new JwtService(new JwtProperties("different-secret-also-long-enough-to-meet-hmac-sha-key-requirements", 900));
+        JwtService issuer = new JwtService(new JwtProperties(SECRET, 900, 2592000));
+        JwtService verifier = new JwtService(new JwtProperties("different-secret-also-long-enough-to-meet-hmac-sha-key-requirements", 900, 2592000));
 
         String token = issuer.generate(42L);
 
