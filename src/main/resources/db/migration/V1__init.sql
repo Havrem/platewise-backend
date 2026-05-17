@@ -55,9 +55,17 @@ create table list_invites (
     unique (list_id, invitee_id)
 );
 
+create table list_sections (
+    id bigserial primary key,
+    item_list_id bigint not null references item_lists(id) on delete cascade,
+    text varchar(500) not null,
+    rank varchar(64) not null
+);
+
 create table items (
     id bigserial primary key,
     item_list_id bigint not null references item_lists(id) on delete cascade,
+    section_id bigint references list_sections(id) on delete set null,
     user_id bigint not null references users(id) on delete cascade,
     type varchar(100) not null check (type in ('BULLET', 'CHECKED', 'NUMBERED', 'NONE')),
     text varchar(500),
@@ -71,7 +79,11 @@ create index idx_list_members_user_id on list_members(user_id);
 
 create index idx_list_invites_invitee_id on list_invites(invitee_id);
 
+create index idx_list_sections_list_rank on list_sections(item_list_id, rank);
+
 create index idx_items_list_id on items(item_list_id);
+
+create index idx_items_section_id on items(section_id);
 
 create index idx_items_user_list_rank on items(user_id, item_list_id, rank);
 

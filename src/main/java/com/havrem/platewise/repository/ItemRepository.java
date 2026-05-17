@@ -18,4 +18,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findFirstByItemListIdOrderByRankDesc(Long itemListId);
 
     List<Item> findAllByItemListIdOrderByRankAsc(Long itemListId);
+
+    List<Item> findAllBySectionId(Long sectionId);
 }

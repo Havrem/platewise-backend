@@ -26,7 +26,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         ItemDto created = client.post().uri("/items")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemRequest("Milk", false, Item.Type.CHECKED, itemListId))
+                .body(new CreateItemRequest("Milk", false, Item.Type.CHECKED, itemListId, null))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemDto.class)
@@ -105,7 +105,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         client.post().uri("/items")
                 .header("Authorization", "Bearer " + tokenB)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemRequest("trying-to-steal-list", false, Item.Type.CHECKED, itemListIdA))
+                .body(new CreateItemRequest("trying-to-steal-list", false, Item.Type.CHECKED, itemListIdA, null))
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -149,7 +149,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/items/" + firstId + "/order")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ReorderItemRequest(secondId, thirdId))
+                .body(new ReorderItemRequest(secondId, thirdId, null))
                 .exchange()
                 .expectStatus().isOk();
 
@@ -175,7 +175,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         client.patch().uri("/items/" + itemInA + "/order")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ReorderItemRequest(itemInB, null))
+                .body(new ReorderItemRequest(itemInB, null, null))
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -212,7 +212,7 @@ class ItemIntegrationTest extends IntegrationTestBase {
         ItemDto created = client.post().uri("/items")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateItemRequest(text, false, Item.Type.CHECKED, itemListId))
+                .body(new CreateItemRequest(text, false, Item.Type.CHECKED, itemListId, null))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(ItemDto.class)

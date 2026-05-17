@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { CategoryMapper.class, ItemMapper.class})
+@Mapper(componentModel = "spring", uses = { CategoryMapper.class, ItemMapper.class, ListSectionMapper.class})
 public interface ItemListMapper {
     ItemListDto toDto(ItemList itemList);
     List<ItemListDto> toDtos(List<ItemList> itemLists);

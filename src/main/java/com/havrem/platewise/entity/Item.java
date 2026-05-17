@@ -16,12 +16,24 @@ public class Item {
     @JoinColumn(name = "item_list_id")
     private ItemList itemList;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id")
+    private ListSection section;
+
     public ItemList getItemList() {
         return itemList;
     }
 
     public void setItemList(ItemList itemList) {
         this.itemList = itemList;
+    }
+
+    public ListSection getSection() {
+        return section;
+    }
+
+    public void setSection(ListSection section) {
+        this.section = section;
     }
 
     public enum Type {
@@ -41,9 +53,14 @@ public class Item {
     }
 
     public Item(String text, Boolean completed, ItemList itemList, User user, Type type, String rank) {
+        this(text, completed, itemList, null, user, type, rank);
+    }
+
+    public Item(String text, Boolean completed, ItemList itemList, ListSection section, User user, Type type, String rank) {
         this.text = text;
         this.completed = completed;
         this.itemList = itemList;
+        this.section = section;
         this.user = user;
         this.type = type;
         this.rank = rank;

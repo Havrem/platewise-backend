@@ -59,6 +59,11 @@ public class ItemListController {
         return itemListService.importItems(user, id, request);
     }
 
+    @PostMapping("/{id}/sections/organize")
+    public ItemListDto organizeGrocerySections(@CurrentUser User user, @PathVariable Long id) {
+        return itemListService.organizeGrocerySections(user, id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@CurrentUser User user, @PathVariable Long id) {

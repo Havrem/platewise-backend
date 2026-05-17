@@ -8,6 +8,7 @@ public record CreateItemRequest(
         @Size(max = 500) String text,
         @NotNull Boolean completed,
         @NotNull Item.Type type,
-        @NotNull Long itemListId
+        @NotNull Long itemListId,
+        Long sectionId
 ) {
 }

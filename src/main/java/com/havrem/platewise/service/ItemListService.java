@@ -10,8 +10,10 @@ import com.havrem.platewise.entity.Category;
 import com.havrem.platewise.entity.Item;
 import com.havrem.platewise.entity.ItemList;
 import com.havrem.platewise.entity.ListMember;
+import com.havrem.platewise.entity.ListSection;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.exception.BadRequestException;
+import com.havrem.platewise.exception.ExternalServiceException;
 import com.havrem.platewise.exception.NotFoundException;
 import com.havrem.platewise.mapper.CategoryMapper;
 import com.havrem.platewise.mapper.ItemListMapper;
@@ -19,11 +21,18 @@ import com.havrem.platewise.repository.CategoryRepository;
 import com.havrem.platewise.repository.ItemRepository;
 import com.havrem.platewise.repository.ItemListRepository;
 import com.havrem.platewise.repository.ListMemberRepository;
+import com.havrem.platewise.repository.ListSectionRepository;
 import com.havrem.platewise.util.LexoRank;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ItemListService {
@@ -34,6 +43,8 @@ public class ItemListService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ListMemberRepository listMemberRepository;
+    private final ListSectionRepository sectionRepository;
+    private final GroceryOrganizer groceryOrganizer;
     private final RealtimeBroadcaster broadcaster;
 
     public ItemListService(ItemListRepository itemListRepository,
@@ -43,6 +54,8 @@ public class ItemListService {
                            CategoryRepository categoryRepository,
                            CategoryMapper categoryMapper,
                            ListMemberRepository listMemberRepository,
+                           ListSectionRepository sectionRepository,
+                           GroceryOrganizer groceryOrganizer,
                            RealtimeBroadcaster broadcaster) {
         this.itemListRepository = itemListRepository;
         this.itemListMapper = itemListMapper;
@@ -51,6 +64,8 @@ public class ItemListService {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
         this.listMemberRepository = listMemberRepository;
+        this.sectionRepository = sectionRepository;
+        this.groceryOrganizer = groceryOrganizer;
         this.broadcaster = broadcaster;
     }
 
@@ -128,6 +143,28 @@ public class ItemListService {
     }
 
     @Transactional
+    public ItemListDto organizeGrocerySections(User user, Long id) {
+        ItemList list = find(user, id);
+        if (list.getType() != ItemList.Type.GROCERY) {
+            throw new BadRequestException("Only grocery lists can be organized by food category.");
+        }
+
+        List<Item> items = itemRepository.findAllByItemListIdOrderByRankAsc(list.getId());
+        if (items.isEmpty()) {
+            return toDtoForUser(list, user);
+        }
+
+        List<ListSection> existingSections = sectionRepository.findAllByItemListIdOrderByRankAsc(list.getId());
+        GroceryOrganization organization = groceryOrganizer.organize(list, items, existingSections);
+        List<GroceryOrganization.Section> sections = validateOrganization(organization, items);
+
+        replaceSections(list, items, existingSections, sections);
+        broadcaster.listChanged(list.getId());
+
+        return toDtoForUser(list, user);
+    }
+
+    @Transactional
     public void delete(User user, Long id) {
         ItemList itemList = find(user, id);
         requireOwner(itemList, user);
@@ -180,7 +217,7 @@ public class ItemListService {
         Category sharedCategory = categoryRepository.findFirstByUserIdAndKind(user.getId(), Category.Kind.SHARED)
                 .orElseGet(() -> categoryRepository.save(new Category("Shared", "shared", user, Category.Kind.SHARED)));
         CategoryDto sharedDto = categoryMapper.toDto(sharedCategory);
-        return new ItemListDto(dto.id(), dto.title(), sharedDto, dto.type(), dto.bookmarked(), dto.items());
+        return new ItemListDto(dto.id(), dto.title(), sharedDto, dto.type(), dto.bookmarked(), dto.sections(), dto.items());
     }
 
     private String neighborRank(User user, ItemList target, Long neighborId) {
@@ -190,5 +227,84 @@ public class ItemListService {
             throw new BadRequestException("Neighbor must be in the same category.");
         }
         return neighbor.getRank();
+    }
+
+    private List<GroceryOrganization.Section> validateOrganization(GroceryOrganization organization, List<Item> items) {
+        if (organization == null || organization.sections() == null) {
+            throw new ExternalServiceException("Gemini returned an invalid organization.");
+        }
+
+        Set<Long> expectedIds = new HashSet<>();
+        for (Item item : items) {
+            expectedIds.add(item.getId());
+        }
+
+        Set<Long> seenIds = new HashSet<>();
+        List<GroceryOrganization.Section> validated = new ArrayList<>();
+        for (GroceryOrganization.Section section : organization.sections()) {
+            if (section == null || section.itemIds() == null) {
+                throw new ExternalServiceException("Gemini returned an invalid organization.");
+            }
+
+            String text = section.text() == null ? "" : section.text().trim();
+            if (text.isBlank() || text.length() > 500) {
+                throw new ExternalServiceException("Gemini returned an invalid category.");
+            }
+
+            if (section.itemIds().isEmpty()) {
+                continue;
+            }
+
+            List<Long> itemIds = new ArrayList<>();
+            for (Long itemId : section.itemIds()) {
+                if (itemId == null || !expectedIds.contains(itemId) || !seenIds.add(itemId)) {
+                    throw new ExternalServiceException("Gemini returned an invalid item assignment.");
+                }
+                itemIds.add(itemId);
+            }
+            validated.add(new GroceryOrganization.Section(text, itemIds));
+        }
+
+        if (!seenIds.equals(expectedIds)) {
+            throw new ExternalServiceException("Gemini did not organize every item.");
+        }
+
+        return validated;
+    }
+
+    private void replaceSections(ItemList list,
+                                 List<Item> items,
+                                 List<ListSection> existingSections,
+                                 List<GroceryOrganization.Section> sections) {
+        Map<Long, Item> itemsById = new HashMap<>();
+        for (Item item : items) {
+            item.setSection(null);
+            itemsById.put(item.getId(), item);
+        }
+        itemRepository.saveAll(items);
+
+        list.getSections().clear();
+        sectionRepository.deleteAll(existingSections);
+
+        String sectionRank = null;
+        String itemRank = null;
+        List<Item> organizedItems = new ArrayList<>();
+        for (GroceryOrganization.Section plannedSection : sections) {
+            sectionRank = LexoRank.between(sectionRank, null);
+            ListSection section = new ListSection(list, plannedSection.text(), sectionRank);
+            sectionRepository.save(section);
+            list.getSections().add(section);
+
+            for (Long itemId : plannedSection.itemIds()) {
+                itemRank = LexoRank.between(itemRank, null);
+                Item item = itemsById.get(itemId);
+                item.setSection(section);
+                item.setRank(itemRank);
+                organizedItems.add(item);
+            }
+        }
+
+        itemRepository.saveAll(organizedItems);
+        list.getItems().sort(Comparator.comparing(Item::getRank));
     }
 }

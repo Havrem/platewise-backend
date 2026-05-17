@@ -36,6 +36,10 @@ public class ItemList {
 
     @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("rank ASC")
+    private List<ListSection> sections = new ArrayList<>();
+
+    @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("rank ASC")
     private List<Item> items = new ArrayList<>();
 
     protected ItemList() {
@@ -103,6 +107,14 @@ public class ItemList {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    public List<ListSection> getSections() {
+        return sections;
+    }
+
+    public void setSections(List<ListSection> sections) {
+        this.sections = sections;
     }
 
     public boolean isBookmarked() {
