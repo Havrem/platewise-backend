@@ -5,6 +5,7 @@ import com.havrem.platewise.dto.category.UpdateCategoryRequest;
 import com.havrem.platewise.dto.category.CategoryDto;
 import com.havrem.platewise.entity.Category;
 import com.havrem.platewise.entity.User;
+import com.havrem.platewise.exception.BadRequestException;
 import com.havrem.platewise.exception.NotFoundException;
 import com.havrem.platewise.mapper.CategoryMapper;
 import com.havrem.platewise.repository.CategoryRepository;
@@ -48,6 +49,7 @@ public class CategoryService {
 
     public CategoryDto update(User user, Long id, UpdateCategoryRequest request) {
         Category category = find(user, id);
+        requireNotShared(category);
 
         categoryMapper.update(category, request);
 
@@ -58,7 +60,14 @@ public class CategoryService {
 
     public void delete(User user, Long id) {
         Category category = find(user, id);
+        requireNotShared(category);
 
         categoryRepository.delete(category);
+    }
+
+    private void requireNotShared(Category category) {
+        if (category.getKind() == Category.Kind.SHARED) {
+            throw new BadRequestException("The Shared category is managed automatically and cannot be modified.");
+        }
     }
 }

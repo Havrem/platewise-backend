@@ -21,17 +21,30 @@ public class Category {
         GENERAL
     }
 
+    public enum Kind {
+        USER,
+        SHARED
+    }
+
     @Enumerated(EnumType.STRING)
     private Type type;
+
+    @Enumerated(EnumType.STRING)
+    private Kind kind;
 
     protected Category() {
     }
 
     public Category(String name, String icon, User user, Type type) {
+        this(name, icon, user, type, Kind.USER);
+    }
+
+    public Category(String name, String icon, User user, Type type, Kind kind) {
         this.name = name;
         this.icon = icon;
         this.user = user;
         this.type = type;
+        this.kind = kind;
     }
 
     public Long getId() {
@@ -72,5 +85,13 @@ public class Category {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    public void setKind(Kind kind) {
+        this.kind = kind;
     }
 }

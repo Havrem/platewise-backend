@@ -42,7 +42,8 @@ class CategoryIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.length()").isEqualTo(1);
+                // Shared category is auto-created on signup, plus the one we just created
+                .jsonPath("$.length()").isEqualTo(2);
 
         client.patch().uri("/categories/" + id)
                 .header("Authorization", "Bearer " + token)
@@ -105,6 +106,7 @@ class CategoryIntegrationTest extends IntegrationTestBase {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.length()").isEqualTo(0);
+                // Only the auto-created Shared category — none of A's categories visible
+                .jsonPath("$.length()").isEqualTo(1);
     }
 }

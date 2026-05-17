@@ -2,6 +2,7 @@ package com.havrem.platewise.service;
 
 import com.havrem.platewise.dto.auth.SignupRequest;
 import com.havrem.platewise.entity.User;
+import com.havrem.platewise.repository.CategoryRepository;
 import com.havrem.platewise.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
     private JwtService jwtService;
     private RefreshTokenService refreshTokenService;
+    private CategoryRepository categoryRepository;
     private AuthService authService;
 
     @BeforeEach
@@ -27,7 +29,8 @@ class AuthServiceTest {
         passwordEncoder = mock(PasswordEncoder.class);
         jwtService = mock(JwtService.class);
         refreshTokenService = mock(RefreshTokenService.class);
-        authService = new AuthService(userRepository, passwordEncoder, jwtService, refreshTokenService);
+        categoryRepository = mock(CategoryRepository.class);
+        authService = new AuthService(userRepository, passwordEncoder, jwtService, refreshTokenService, categoryRepository);
     }
 
     @Test

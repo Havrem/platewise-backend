@@ -3,9 +3,11 @@ package com.havrem.platewise.service;
 import com.havrem.platewise.dto.auth.AuthResponse;
 import com.havrem.platewise.dto.auth.LoginRequest;
 import com.havrem.platewise.dto.auth.SignupRequest;
+import com.havrem.platewise.entity.Category;
 import com.havrem.platewise.entity.User;
 import com.havrem.platewise.exception.ConflictException;
 import com.havrem.platewise.exception.UnauthorizedException;
+import com.havrem.platewise.repository.CategoryRepository;
 import com.havrem.platewise.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,12 +19,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final CategoryRepository categoryRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional
@@ -33,6 +37,8 @@ public class AuthService {
 
         User user = new User(request.email(), passwordEncoder.encode(request.password()));
         User saved = userRepository.save(user);
+
+        categoryRepository.save(new Category("Shared", "shared", saved, Category.Type.GENERAL, Category.Kind.SHARED));
 
         return issueTokens(saved);
     }

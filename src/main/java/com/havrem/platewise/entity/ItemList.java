@@ -22,23 +22,21 @@ public class ItemList {
 
     private String rank;
 
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListMember> members = new ArrayList<>();
+
     @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("rank ASC")
     private List<Item> items = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
     protected ItemList() {
     }
 
-    public ItemList(String title, Category category, boolean bookmarked, String rank, User user) {
+    public ItemList(String title, Category category, boolean bookmarked, String rank) {
         this.title = title;
         this.category = category;
         this.bookmarked = bookmarked;
         this.rank = rank;
-        this.user = user;
     }
 
     public Long getId() {
@@ -93,11 +91,7 @@ public class ItemList {
         return bookmarked;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+    public List<ListMember> getMembers() {
+        return members;
     }
 }

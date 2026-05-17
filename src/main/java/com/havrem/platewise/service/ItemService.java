@@ -21,22 +21,24 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
     private final ItemListService itemListService;
+    private final RealtimeBroadcaster broadcaster;
 
-    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper, ItemListService itemListService) {
+    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper, ItemListService itemListService, RealtimeBroadcaster broadcaster) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.itemListService = itemListService;
+        this.broadcaster = broadcaster;
     }
 
     public Item find(User user, Long id) {
-        return itemRepository.findByUserIdAndId(user.getId(), id).orElseThrow(() -> NotFoundException.of("Item", id));
+        return itemRepository.findByIdForMember(id, user.getId()).orElseThrow(() -> NotFoundException.of("Item", id));
     }
 
     public ItemDto create(User user, CreateItemRequest request) {
         ItemList itemList = itemListService.find(user, request.itemListId());
 
         String lastRank = itemRepository
-                .findFirstByUserIdAndItemListIdOrderByRankDesc(user.getId(), itemList.getId())
+                .findFirstByItemListIdOrderByRankDesc(itemList.getId())
                 .map(Item::getRank)
                 .orElse(null);
         String rank = LexoRank.between(lastRank, null);
@@ -44,6 +46,7 @@ public class ItemService {
         Item item = new Item(request.text(), request.completed(), itemList, user, request.type(), rank);
 
         itemRepository.save(item);
+        broadcaster.listChanged(itemList.getId());
 
         return itemMapper.toDto(item);
     }
@@ -55,7 +58,7 @@ public class ItemService {
     }
 
     public List<ItemDto> readAll(User user) {
-        List<Item> items = itemRepository.findAllByUserIdOrderByRankAsc(user.getId());
+        List<Item> items = itemRepository.findAllForMember(user.getId());
 
         return itemMapper.toDtos(items);
     }
@@ -66,14 +69,17 @@ public class ItemService {
         itemMapper.update(item, request);
 
         itemRepository.save(item);
+        broadcaster.listChanged(item.getItemList().getId());
 
         return itemMapper.toDto(item);
     }
 
     public void delete(User user, Long id) {
         Item item = find(user, id);
+        Long listId = item.getItemList().getId();
 
         itemRepository.delete(item);
+        broadcaster.listChanged(listId);
     }
 
     public ItemDto reorder(User user, Long id, ReorderItemRequest request) {
@@ -84,6 +90,7 @@ public class ItemService {
 
         item.setRank(LexoRank.between(prevRank, nextRank));
         itemRepository.save(item);
+        broadcaster.listChanged(item.getItemList().getId());
 
         return itemMapper.toDto(item);
     }
